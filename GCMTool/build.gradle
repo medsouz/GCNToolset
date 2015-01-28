@@ -1,0 +1,28 @@
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.7
+mainClassName = 'net.medsouz.gcn.gcmtool.GCMTool'
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'GCMTool', 'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	compile project(":GCNCommon")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/'
+        }
+    }
+}
