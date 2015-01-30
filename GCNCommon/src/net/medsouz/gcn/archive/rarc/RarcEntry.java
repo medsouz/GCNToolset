@@ -23,7 +23,7 @@ public class RarcEntry {
     this.fileSize = buf.getInt();
     buf.getInt(); // unused
 
-    this.name = RarcArchive.lookupString(stringTable, this.nameOffset);
+    this.name = ArchiveRARC.lookupString(stringTable, this.nameOffset);
   }
 
   @Override

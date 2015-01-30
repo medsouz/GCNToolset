@@ -20,8 +20,8 @@ public class RarcNode {
     this.nameOffset = buf.getInt();
     this.hash = buf.getShort();
     this.files = buf.getShort();
-    this.fileOffset = buf.getShort();
-    this.name = RarcArchive.lookupString(stringTable, this.nameOffset);
+    this.fileOffset = buf.getInt();
+    this.name = ArchiveRARC.lookupString(stringTable, this.nameOffset);
 
     this.entries = new RarcEntry[this.files];
   }

@@ -1,0 +1,28 @@
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.7
+mainClassName = 'net.medsouz.gcn.extrarct.ExtRARCt'
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'extRARCt', 'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	compile project(":GCNCommon")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/'
+        }
+    }
+}

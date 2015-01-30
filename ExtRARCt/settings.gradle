@@ -1,0 +1,3 @@
+include ":GCNCommon"
+
+project(":GCNCommon").projectDir = file("../GCNCommon")
