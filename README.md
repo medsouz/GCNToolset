@@ -10,6 +10,8 @@ Tools
 
 **GCMTool** - Allows you to extract, modify, and repack Gamecube disk images
 
+**ExtRARCt** - Lets you extract and create RARC (*.arc) archives.
+
 License
 -------
 The MIT License (MIT)
