@@ -30,6 +30,21 @@ public class ByteUtils {
 		return ByteBuffer.wrap(newBytes).getInt();
 	}
 	
+	public static int getUnsignedByte(ByteBuffer buff) {
+		return (buff.get() & 0xff);
+	}
+	
+	public static int getUnsignedShort(ByteBuffer buff) {
+		return (buff.getShort() & 0xffff);
+	}
+	
+	public static String getString(ByteBuffer buff, int length) {
+		String str = "";
+		for(int x = 0; x < length; x++)
+			str += (char)buff.get();
+		return str;
+	}
+	
 	public static void dumpFile(FileChannel fc, File out, int dataOffset, int dataSize) {
 		try {
 			ByteBuffer fileOut = ByteBuffer.allocate(dataSize);

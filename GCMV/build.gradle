@@ -1,0 +1,37 @@
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.7
+mainClassName = 'net.medsouz.gcn.gcmv.GCMV'
+version = '1.0'
+
+ext {
+	gdxVersion = "1.5.3"
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'GCMV', 'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+dependencies {
+    compile project(":GCNCommon")
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/'
+        }
+    }
+}
