@@ -49,7 +49,7 @@ public class ArchiveRARC implements IArchive {
 				}
 			}
 			//Dump ROOT node
-			dumpNode(nodes[0], output, chan);
+			dumpNode(nodes[0], output, chan, hdr.dataTableOffset);
 			raf.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -88,16 +88,16 @@ public class ArchiveRARC implements IArchive {
 		return builder.toString();
 	}
 	
-	private void dumpNode(RarcNode node, File outDir, FileChannel fc) {
+	private void dumpNode(RarcNode node, File outDir, FileChannel fc, int fileDataOffset) {
 		File dir = new File(outDir.getAbsolutePath() + "/" + node.name);
 		dir.mkdir();
 		for(RarcEntry re : node.entries) {
 			if(!re.name.equals(".") && !re.name.equals("..")) {
 				if(re.type == 0x200) {
-					dumpNode(nodes[re.fileOffset], dir, fc);
+					dumpNode(nodes[re.fileOffset], dir, fc, fileDataOffset);
 				} else {
 					System.out.println("Extracting " + re.name + " (" + re.fileSize + " bytes)");
-					ByteUtils.dumpFile(fc, new File(dir.getAbsolutePath() + "/" + re.name), node.fileOffset + re.fileOffset, re.fileSize);
+					ByteUtils.dumpFile(fc, new File(dir.getAbsolutePath() + "/" + re.name), fileDataOffset + 0x20 + re.fileOffset, re.fileSize);
 				}
 			}
 		}
