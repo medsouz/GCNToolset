@@ -67,10 +67,11 @@ public class VTX1 extends Section {
 		vf.length = getDataLength(vertexDataOffsetIndex, b.capacity());
 		vf.type = VertexType.fromValue(b.getInt());
 		vf.componentCount = b.getInt();
+		vf.dataID = b.getInt();
 		if(vf.type.isColorData())
-			vf.dataTypeColor = DataTypeColor.values()[b.getInt()];
+			vf.dataTypeColor = DataTypeColor.values()[vf.dataID];
 		else
-			vf.dataType = DataType.values()[b.getInt()];
+			vf.dataType = DataType.values()[vf.dataID];
 		vf.decimalPoint = b.get();
 		b.get();//Padding
 		b.getShort();//Padding

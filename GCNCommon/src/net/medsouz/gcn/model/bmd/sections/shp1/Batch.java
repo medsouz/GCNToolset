@@ -24,6 +24,7 @@ public class Batch {
 	
 	public class Attrib {
 		public VertexType type;
+		public int dataID;
 		//Only one of the two DataTypes is used depending on type.isColor()
 		public DataType data;
 		public DataTypeColor colorData;
@@ -34,5 +35,13 @@ public class Batch {
 		public int offset;
 		public ArrayList<Primitive> primitives = new ArrayList<Primitive>();
 		public ArrayList<Short> matrices = new ArrayList<Short>();
+	}
+	
+	public boolean hasAttrib(VertexType type) {
+		for(Attrib a : attribs) {
+			if(a.type == type)
+				return true;
+		}
+		return false;
 	}
 }

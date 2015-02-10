@@ -3,6 +3,13 @@ package net.medsouz.gcn.gcmv;
 import java.util.ArrayList;
 
 import net.medsouz.gcn.model.bmd.BMD;
+import net.medsouz.gcn.model.bmd.sections.drw1.DRW1;
+import net.medsouz.gcn.model.bmd.sections.drw1.DrawData;
+import net.medsouz.gcn.model.bmd.sections.inf1.Hierarchy;
+import net.medsouz.gcn.model.bmd.sections.inf1.HierarchyType;
+import net.medsouz.gcn.model.bmd.sections.inf1.INF1;
+import net.medsouz.gcn.model.bmd.sections.jnt1.JNT1;
+import net.medsouz.gcn.model.bmd.sections.jnt1.JointEntry;
 import net.medsouz.gcn.model.bmd.sections.shp1.Batch;
 import net.medsouz.gcn.model.bmd.sections.shp1.Batch.Packet;
 import net.medsouz.gcn.model.bmd.sections.shp1.Primitive;
@@ -25,6 +32,8 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
 public class GCMVApp implements ApplicationListener {
@@ -42,32 +51,62 @@ public class GCMVApp implements ApplicationListener {
 	@Override
 	public void create() {
 		cam  = new PerspectiveCamera(75, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		cam.position.set(40f, 40f, 40f);
+		cam.position.set(80f, 80f, 80f);
 		cam.lookAt(0f, 0f, 0f);
 		cam.near = 0.1f;
 		cam.far = 300.0f;
 		mb = new ModelBatch();
 		ModelBuilder modelBuilder = new ModelBuilder();
+		INF1 inf1 = (INF1) model.getSection("INF1");
 		VTX1 vtx1 = (VTX1) model.getSection("VTX1");
 		SHP1 shp1 = (SHP1) model.getSection("SHP1");
+		JNT1 jnt1 = (JNT1) model.getSection("JNT1");
+		DRW1 drw1 = (DRW1) model.getSection("DRW1");
 		ArrayList<Vector3> positions = getPositions(vtx1.getVertexFormat(VertexType.Position).data);
-		
+		ArrayList<Matrix4> jointMatrices = getJointMatrices(jnt1.joints, inf1);
+		ArrayList<Matrix4> lastMatrixTable = null;
 		//TODO: Add support for matrices to make it not a random blob of vertices
-		for(Batch batch : shp1.batches) {
-			modelBuilder.begin();
-			MeshPartBuilder meshBuilder = modelBuilder.part("test", GL20.GL_LINES /* TODO: Change this based on the primitive's type */, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.BLUE)));
-			for(Vector3 pos : positions) {
-				meshBuilder.vertex(pos, null, Color.GREEN, null);
-			}
-			for(Packet packet : batch.packets) {
-				for(Primitive prim : packet.primitives) {
-					for(Short index : prim.positionIndices) {
-						meshBuilder.index(index);
+		for(Hierarchy h : inf1.hierarchy) {
+			if(h.type == HierarchyType.Shape) {
+				Batch batch = shp1.batches.get(h.index);
+				modelBuilder.begin();
+				for(Packet packet : batch.packets) {
+					ArrayList<Matrix4> matrixTable = new ArrayList<Matrix4>();
+					for(int m = 0; m < packet.matrices.size(); m++) {
+						Short matrixIndex = packet.matrices.get(m);
+						if(matrixIndex == -1) {
+							matrixTable.add(lastMatrixTable.get(m));
+						} else {
+							DrawData data = drw1.drawData.get(matrixIndex);
+							if(data.weighted) {
+								System.out.println("Weighted");
+								matrixTable.add(new Matrix4());
+							} else {
+								matrixTable.add(jointMatrices.get(data.index));
+							}
+						}
+					}
+					lastMatrixTable = matrixTable;
+					
+					for(Primitive prim : packet.primitives) {
+						//TODO: Change based on the primitive's type
+						MeshPartBuilder meshBuilder = modelBuilder.part(prim.toString(), GL20.GL_LINES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.GREEN)));
+						for(int i = 0; i < prim.numVertices; i++) {
+							if(batch.hasAttrib(VertexType.PositionMatrixIndex)) {
+								Matrix4 mtx = matrixTable.get(prim.positionMatrixIndices.get(i));
+								meshBuilder.setVertexTransform(mtx);
+							} else {
+								meshBuilder.setVertexTransform(matrixTable.get(0));
+							}
+							Vector3 pos = positions.get(prim.positionIndices.get(i));
+							meshBuilder.index(meshBuilder.vertex(pos, null, null, null));
+						}
 					}
 				}
+				Model mdl = modelBuilder.end();
+				System.out.println("Model Parts: " + mdl.meshParts.size);
+				modelInstances.add(new ModelInstance(mdl));
 			}
-			Model mdl = modelBuilder.end();
-			modelInstances.add(new ModelInstance(mdl));
 		}
 		
 		//Model mdl = modelBuilder.createBox(10, 10, 10,  new Material(ColorAttribute.createDiffuse(Color.BLUE)), Usage.Position | Usage.Normal);
@@ -121,6 +160,52 @@ public class GCMVApp implements ApplicationListener {
 		}
 		System.out.println("Vertices: " + positions.size());
 		return positions;
+	}
+	
+	//TODO: Find out why this is so fucked up that joints end up floating around randomly
+	public ArrayList<Matrix4> getJointMatrices(ArrayList<JointEntry> joints, INF1 inf1) {
+		ArrayList<Matrix4> matrices = new ArrayList<Matrix4>();
+		
+		for(int j = 0; j < joints.size(); j++) {
+			JointEntry jnt = joints.get(j);
+			
+			Vector3 position = new Vector3(jnt.posX, jnt.posY, jnt.posZ);
+			Quaternion rotation = new Quaternion();
+			rotation.setFromAxis(Vector3.X, jnt.rotX);
+			rotation.setFromAxis(Vector3.Y, jnt.rotY);
+			rotation.setFromAxis(Vector3.Z, jnt.rotZ);
+			Vector3 scale = new Vector3(jnt.scaleX, jnt.scaleY, jnt.scaleZ);
+			
+			/*Matrix4 mat = new Matrix4();
+			mat.scale(jnt.scaleX, jnt.scaleY, jnt.scaleZ);
+			mat.rotate(Vector3.X, jnt.rotX);
+			mat.rotate(Vector3.Y, jnt.rotY);
+			mat.rotate(Vector3.Z, jnt.rotZ);
+			mat.translate(jnt.posX, jnt.posY, jnt.posZ);*/
+			Matrix4 mat = new Matrix4(position, rotation, scale);
+			//Apply hierarchy
+			for(Hierarchy h : inf1.hierarchy) {
+				if(h.type == HierarchyType.Joint && h.index == j) {
+					Hierarchy par = h;
+					do {
+						if(par.parent == -1) {
+							par = null;
+							break;
+						}
+						par = inf1.hierarchy.get(par.parent);
+					} while(par.type != HierarchyType.Joint);
+					
+					if(par != null) {
+						Matrix4 p = matrices.get(par.index);
+						mat.mul(p);
+					}
+					break;
+				}
+			}
+			matrices.add(mat);
+		}
+		
+		return matrices;
 	}
 	
 }

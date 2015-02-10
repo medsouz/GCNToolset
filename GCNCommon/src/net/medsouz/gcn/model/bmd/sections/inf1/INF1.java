@@ -2,6 +2,7 @@ package net.medsouz.gcn.model.bmd.sections.inf1;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import net.medsouz.gcn.model.bmd.BMD;
 import net.medsouz.gcn.model.bmd.sections.Section;
@@ -9,7 +10,7 @@ import net.medsouz.gcn.model.bmd.sections.Section;
 public class INF1 extends Section {
 	
 	int numVertexes;
-	ArrayList<Hierarchy> hierarchy = new ArrayList<Hierarchy>();
+	public ArrayList<Hierarchy> hierarchy = new ArrayList<Hierarchy>();
 	
 	public INF1(BMD parent) {
 		super(parent);
@@ -27,13 +28,35 @@ public class INF1 extends Section {
 		int dataOffset = b.getInt();
 		b.position(dataOffset);
 		hierarchy.clear();
+		Stack<Integer> nodes = new Stack<>();
+		nodes.push(-1);
 		while(true) {
 			Hierarchy h = new Hierarchy();
 			h.type = HierarchyType.fromValue(b.getShort());
 			h.index = b.getShort();
-			hierarchy.add(h);
+			
 			if(h.type == HierarchyType.Finish)
 				break;
+			
+			switch(h.type) {
+			case NewNode:
+				nodes.push(hierarchy.size() - 1);
+				break;
+			case EndNode:
+				nodes.pop();
+				break;
+			case Joint:
+			case Shape:
+				h.parent = nodes.peek();
+				System.out.println("\tHierarchy " + hierarchy.size());
+				System.out.println("\t\tType: " + h.type.name());
+				System.out.println("\t\tIndex: " + h.index);
+				System.out.println("\t\tParent: " + h.parent);
+				hierarchy.add(h);
+				break;
+			default:
+				break;
+			}
 		}
 		System.out.println("\tHierarchy contains " + hierarchy.size() + " indexes");
 	}

@@ -11,6 +11,7 @@ import java.util.Map;
 import net.medsouz.gcn.model.bmd.sections.Section;
 import net.medsouz.gcn.model.bmd.sections.drw1.DRW1;
 import net.medsouz.gcn.model.bmd.sections.inf1.INF1;
+import net.medsouz.gcn.model.bmd.sections.jnt1.JNT1;
 import net.medsouz.gcn.model.bmd.sections.shp1.SHP1;
 import net.medsouz.gcn.model.bmd.sections.vtx1.VTX1;
 import net.medsouz.gcn.util.ByteUtils;
@@ -25,6 +26,7 @@ public class BMD {
 		sections.put("INF1", new INF1(this));
 		sections.put("VTX1", new VTX1(this));
 		sections.put("DRW1", new DRW1(this));
+		sections.put("JNT1", new JNT1(this));
 		sections.put("SHP1", new SHP1(this));
 	}
 	

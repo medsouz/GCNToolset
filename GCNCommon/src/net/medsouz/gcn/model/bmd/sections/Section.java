@@ -7,7 +7,7 @@ import net.medsouz.gcn.model.bmd.BMD;
 public abstract class Section {
 	
 	private boolean loaded = false;
-	private BMD parent;
+	public BMD parent;
 	
 	public Section(BMD parent) {
 		this.parent = parent;

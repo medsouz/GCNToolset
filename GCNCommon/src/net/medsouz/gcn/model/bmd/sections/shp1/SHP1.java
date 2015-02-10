@@ -91,11 +91,12 @@ public class SHP1 extends Section {
 				
 				System.out.println("\t\tAttrib #" + batch.attribs.size());
 				System.out.println("\t\t\tType: " + attr.type.name());
+				attr.dataID = b.getInt();
 				if(!attr.type.isColorData()) {
-					attr.data = DataType.values()[b.getInt()];
+					attr.data = DataType.values()[attr.dataID];
 					System.out.println("\t\t\tDataType: " + attr.data.name());
 				} else {
-					attr.colorData = DataTypeColor.values()[b.getInt()];
+					attr.colorData = DataTypeColor.values()[attr.dataID];
 					System.out.println("\t\t\tDataType: " + attr.colorData.name());
 				}
 				
@@ -123,38 +124,35 @@ public class SHP1 extends Section {
 					primitive.type = PrimitiveType.fromValue(type);
 					primitive.numVertices = b.getShort();
 					
-					System.out.println("\t\t\tPrimitive #" + packet.primitives.size());
-					System.out.println("\t\t\t\tType: " + primitive.type.name());
-					System.out.println("\t\t\t\tnumVertices: " + primitive.numVertices);
+					//System.out.println("\t\t\tPrimitive #" + packet.primitives.size());
+					//System.out.println("\t\t\t\tType: " + primitive.type.name());
+					//System.out.println("\t\t\t\tnumVertices: " + primitive.numVertices);
 					
 					for(int v = 0; v < primitive.numVertices; v++) {
 						for(Attrib attr : batch.attribs) {
-							short indice = -1;
-							if(!attr.type.isColorData()) {
-								switch(attr.data) {
-								case Signed8:
-									indice = b.get();
+							int indice = -1;
+							switch(attr.dataID) {
+								case 1://Signed8
+									indice = b.get() & 0xFF;
 									break;
-								case Signed16:
-									indice = b.getShort();
+								case 3://Signed16
+									indice = b.getShort() & 0xFFFF;
 									break;
 								//I don't think any other data types are used
 								default:
 									System.out.println("Didn't read type: " + attr.data.name());
 									break;
-								}
-							} else {
-								System.out.println("PANIC: We shouldn't see colors here!");
 							}
 							
 							switch(attr.type) {
 							case PositionMatrixIndex:
-								primitive.positionMatrixIndices.add(indice);
+								primitive.positionMatrixIndices.add(indice / 3);
 								break;
 							case Position:
 								primitive.positionIndices.add(indice);
 								break;
 							default:
+								//System.out.println("\t\t\tUnsupported attribute: " + attr.type);
 								break;
 							}
 						}

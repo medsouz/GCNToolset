@@ -5,4 +5,5 @@ public class Hierarchy {
 	//Index into Joint, Material or Shape table
 	//always zero for types 0, 1 and 2
 	public short index;
+	public int parent;
 }
