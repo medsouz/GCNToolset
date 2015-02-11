@@ -96,7 +96,7 @@ public class VTX1 extends Section {
 		return sectionSize - vertexDataOffset[dataIndex];
 	}
 	
-	private Object readData(VertexFormat vf, ByteBuffer b) {
+	private float readData(VertexFormat vf, ByteBuffer b) {
 		if(!vf.type.isColorData()) {
 			switch(vf.dataType) {
 			case Unsigned8:
@@ -114,7 +114,7 @@ public class VTX1 extends Section {
 			//The program doesn't understand colors yet!
 			b.position(b.position() + vf.length);
 		}
-		return null;
+		return -1;
 	}
 
 	public VertexFormat getVertexFormat(VertexType position) {

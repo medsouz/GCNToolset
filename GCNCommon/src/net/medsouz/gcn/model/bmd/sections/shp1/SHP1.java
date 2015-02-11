@@ -151,6 +151,9 @@ public class SHP1 extends Section {
 							case Position:
 								primitive.positionIndices.add(indice);
 								break;
+							case Normal:
+								primitive.normalIndices.add(indice);
+								break;
 							default:
 								//System.out.println("\t\t\tUnsupported attribute: " + attr.type);
 								break;

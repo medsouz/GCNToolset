@@ -30,6 +30,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
@@ -52,7 +53,7 @@ public class GCMVApp implements ApplicationListener {
 	public void create() {
 		cam  = new PerspectiveCamera(75, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		cam.position.set(80f, 80f, 80f);
-		cam.lookAt(0f, 0f, 0f);
+		cam.lookAt(0f, 60f, 0f);
 		cam.near = 0.1f;
 		cam.far = 300.0f;
 		mb = new ModelBatch();
@@ -63,9 +64,10 @@ public class GCMVApp implements ApplicationListener {
 		JNT1 jnt1 = (JNT1) model.getSection("JNT1");
 		DRW1 drw1 = (DRW1) model.getSection("DRW1");
 		ArrayList<Vector3> positions = getPositions(vtx1.getVertexFormat(VertexType.Position).data);
+		ArrayList<Vector3> normals = getPositions(vtx1.getVertexFormat(VertexType.Normal).data);
 		ArrayList<Matrix4> jointMatrices = getJointMatrices(jnt1.joints, inf1);
 		ArrayList<Matrix4> lastMatrixTable = null;
-		//TODO: Add support for matrices to make it not a random blob of vertices
+
 		for(Hierarchy h : inf1.hierarchy) {
 			if(h.type == HierarchyType.Shape) {
 				Batch batch = shp1.batches.get(h.index);
@@ -87,10 +89,10 @@ public class GCMVApp implements ApplicationListener {
 						}
 					}
 					lastMatrixTable = matrixTable;
-					
+
 					for(Primitive prim : packet.primitives) {
 						//TODO: Change based on the primitive's type
-						MeshPartBuilder meshBuilder = modelBuilder.part(prim.toString(), GL20.GL_LINES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.GREEN)));
+						MeshPartBuilder meshBuilder = modelBuilder.part(prim.toString(), GL20.GL_TRIANGLE_STRIP, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.GREEN)));
 						for(int i = 0; i < prim.numVertices; i++) {
 							if(batch.hasAttrib(VertexType.PositionMatrixIndex)) {
 								Matrix4 mtx = matrixTable.get(prim.positionMatrixIndices.get(i));
@@ -99,7 +101,11 @@ public class GCMVApp implements ApplicationListener {
 								meshBuilder.setVertexTransform(matrixTable.get(0));
 							}
 							Vector3 pos = positions.get(prim.positionIndices.get(i));
-							meshBuilder.index(meshBuilder.vertex(pos, null, null, null));
+							Vector3 nor = null;
+							if(batch.hasAttrib(VertexType.Normal))
+								nor = normals.get(prim.normalIndices.get(i));
+
+							meshBuilder.index(meshBuilder.vertex(pos, nor, null, null));
 						}
 					}
 				}
@@ -108,11 +114,9 @@ public class GCMVApp implements ApplicationListener {
 				modelInstances.add(new ModelInstance(mdl));
 			}
 		}
-		
-		//Model mdl = modelBuilder.createBox(10, 10, 10,  new Material(ColorAttribute.createDiffuse(Color.BLUE)), Usage.Position | Usage.Normal);
-
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.8f, 0.8f, 0.8f, 1.0f));
+		environment.add(new DirectionalLight().set(1, 1, 1, 1, 0, 1));
 	}
 
 	@Override
@@ -122,16 +126,15 @@ public class GCMVApp implements ApplicationListener {
 
 	@Override
 	public void render() {
-		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		Gdx.gl.glClearColor(0, 0, 0, 0);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		
 		cam.rotateAround(Vector3.Zero, new Vector3(0,1,0), 1f);
 		cam.update();
 		
+		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
 		mb.begin(cam);
 			for(ModelInstance modelInstance : modelInstances)
-				mb.render(modelInstance);
+				mb.render(modelInstance, environment);
 		mb.end();
 	}
 
@@ -153,16 +156,13 @@ public class GCMVApp implements ApplicationListener {
 	
 	public ArrayList<Vector3> getPositions(ArrayList<Object> data) {
 		ArrayList<Vector3> positions = new ArrayList<Vector3>();
-		System.out.println("Positions: " + data.size());
 		for(int x = 0; x < data.size(); x+=3) {
 			Vector3 v3 = new Vector3((float)data.get(x), (float)data.get(x + 1), (float)data.get(x + 2));
 			positions.add(v3);
 		}
-		System.out.println("Vertices: " + positions.size());
 		return positions;
 	}
 	
-	//TODO: Find out why this is so fucked up that joints end up floating around randomly
 	public ArrayList<Matrix4> getJointMatrices(ArrayList<JointEntry> joints, INF1 inf1) {
 		ArrayList<Matrix4> matrices = new ArrayList<Matrix4>();
 		
@@ -175,13 +175,7 @@ public class GCMVApp implements ApplicationListener {
 			rotation.setFromAxis(Vector3.Y, jnt.rotY);
 			rotation.setFromAxis(Vector3.Z, jnt.rotZ);
 			Vector3 scale = new Vector3(jnt.scaleX, jnt.scaleY, jnt.scaleZ);
-			
-			/*Matrix4 mat = new Matrix4();
-			mat.scale(jnt.scaleX, jnt.scaleY, jnt.scaleZ);
-			mat.rotate(Vector3.X, jnt.rotX);
-			mat.rotate(Vector3.Y, jnt.rotY);
-			mat.rotate(Vector3.Z, jnt.rotZ);
-			mat.translate(jnt.posX, jnt.posY, jnt.posZ);*/
+
 			Matrix4 mat = new Matrix4(position, rotation, scale);
 			//Apply hierarchy
 			for(Hierarchy h : inf1.hierarchy) {
@@ -197,7 +191,7 @@ public class GCMVApp implements ApplicationListener {
 					
 					if(par != null) {
 						Matrix4 p = matrices.get(par.index);
-						mat.mul(p);
+						mat.mulLeft(p);
 					}
 					break;
 				}

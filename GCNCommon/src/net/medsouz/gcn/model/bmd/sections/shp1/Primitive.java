@@ -8,4 +8,5 @@ public class Primitive {
 	
 	public ArrayList<Integer> positionMatrixIndices = new ArrayList<Integer>();
 	public ArrayList<Integer> positionIndices = new ArrayList<Integer>();
+	public ArrayList<Integer> normalIndices = new ArrayList<Integer>();
 }
