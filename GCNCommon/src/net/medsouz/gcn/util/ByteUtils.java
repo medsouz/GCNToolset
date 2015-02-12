@@ -45,6 +45,20 @@ public class ByteUtils {
 		return str;
 	}
 	
+	public static void writeStringToFile(File input, String str, int position) {
+		try {
+			RandomAccessFile raf = new RandomAccessFile(input, "rw");
+			FileChannel fc = raf.getChannel();
+			ByteBuffer buff = ByteBuffer.allocate(str.getBytes().length);
+			buff.put(str.getBytes());
+			buff.flip();
+			fc.write(buff, position);
+			raf.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void dumpFile(FileChannel fc, File out, int dataOffset, int dataSize) {
 		try {
 			ByteBuffer fileOut = ByteBuffer.allocate(dataSize);

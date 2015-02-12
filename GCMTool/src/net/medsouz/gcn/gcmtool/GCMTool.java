@@ -52,6 +52,32 @@ public class GCMTool {
 					}
 					gcm.create(args[1], new File(out));
 					break;
+				case "setname":
+					if(!gcm.isValid(archive)) {
+						System.out.println("This is not a valid Gamecube disk image!");
+						return;
+					}
+					if(args.length > 2) {
+						String name = args[2];
+						for(int x = 3; x < args.length; x++)
+							name = name + " " + args[x];
+						System.out.println("Setting name to \"" + name + "\"");
+						gcm.setGameName(archive, name);
+					} else {
+						System.out.println("Missing name!");
+					}
+					break;
+				case "setid":
+					if(!gcm.isValid(archive)) {
+						System.out.println("This is not a valid Gamecube disk image!");
+						return;
+					}
+					if(args.length > 1) {
+						String name = args[2];
+						System.out.println("Setting ID to \"" + name + "\"");
+						gcm.setGameID(archive, name);
+					}
+					break;
 				default:
 					System.out.println("Unknown command: \"" + args[0] + "\"");
 					showUsage();
@@ -73,6 +99,12 @@ public class GCMTool {
 		System.out.println("\ncreate\t Recreate previously extracted disk");
 		System.out.println("       \t Arguments:");
 		System.out.println("       \t [outputFile=out.iso]");
+		System.out.println("\nsetname\t Set the disk's name");
+		System.out.println("       \t Arguments:");
+		System.out.println("       \t [name]");
+		System.out.println("\nsetid\t Set the disk's ID");
+		System.out.println("       \t Arguments:");
+		System.out.println("       \t [GameID]");
 	}
 	
 	private static void getInfo(File archive) throws IOException {

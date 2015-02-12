@@ -225,6 +225,18 @@ public class ArchiveGCM implements IArchive {
 		return gameID;
 	}
 	
+	public void setGameID(File input, String gameid) {
+		if(gameid.length() == 6) {
+			try {
+				ByteUtils.writeStringToFile(input, gameid, 0);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Invalid Game ID! Game ID should be 6 characters long!");
+		}
+	}
+
 	public static String getGameName(File input) {
 		String gameName = "";
 		try {
@@ -243,7 +255,21 @@ public class ArchiveGCM implements IArchive {
 		}
 		return gameName;
 	}
-	
+
+	public void setGameName(File input, String name) {
+		if(name.length() <= 0x3e0) {
+			try {
+				while(name.length() < 0x3e0)
+					name += (char)0;
+				ByteUtils.writeStringToFile(input, name, 0x20);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Invalid game name! Name cannot exceed 992 characters!");
+		}
+	}
+
 	public static int getDOLSize(File input) throws IOException {
 		int DOLSize = 0;
 		RandomAccessFile raf = new RandomAccessFile(input, "r");
