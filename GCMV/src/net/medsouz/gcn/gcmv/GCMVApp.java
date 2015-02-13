@@ -169,14 +169,24 @@ public class GCMVApp implements ApplicationListener {
 		for(int j = 0; j < joints.size(); j++) {
 			JointEntry jnt = joints.get(j);
 			
-			Vector3 position = new Vector3(jnt.posX, jnt.posY, jnt.posZ);
-			Quaternion rotation = new Quaternion();
-			rotation.setFromAxis(Vector3.X, jnt.rotX);
-			rotation.setFromAxis(Vector3.Y, jnt.rotY);
-			rotation.setFromAxis(Vector3.Z, jnt.rotZ);
-			Vector3 scale = new Vector3(jnt.scaleX, jnt.scaleY, jnt.scaleZ);
+			Matrix4 pos = new Matrix4();
+			pos.translate(jnt.posX, jnt.posY, jnt.posZ);
+			Matrix4 rotX = new Matrix4();
+			rotX.rotate(Vector3.X, jnt.rotX);
+			Matrix4 rotY = new Matrix4();
+			rotY.rotate(Vector3.Y, jnt.rotY);
+			Matrix4 rotZ = new Matrix4();
+			rotZ.rotate(Vector3.Z, jnt.rotZ);
+			Matrix4 scale = new Matrix4();
+			scale.scale(jnt.scaleX, jnt.scaleY, jnt.scaleZ);
 
-			Matrix4 mat = new Matrix4(position, rotation, scale);
+			Matrix4 mat = new Matrix4();
+			mat.mulLeft(scale);
+			mat.mulLeft(rotX);
+			mat.mulLeft(rotY);
+			mat.mulLeft(rotZ);
+			mat.mulLeft(pos);
+
 			//Apply hierarchy
 			for(Hierarchy h : inf1.hierarchy) {
 				if(h.type == HierarchyType.Joint && h.index == j) {

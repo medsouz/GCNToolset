@@ -38,9 +38,9 @@ public class JNT1 extends Section {
 			jnt.scaleY = b.getFloat();
 			jnt.scaleZ = b.getFloat();
 			//Rotation
-			jnt.rotX = (float) ((b.getShort() / 32768f) * 180f);
-			jnt.rotY = (float) ((b.getShort() / 32768f) * 180f);
-			jnt.rotZ = (float) ((b.getShort() / 32768f) * 180f);
+			jnt.rotX = ((float)b.getShort() / 32768f) * 180f;
+			jnt.rotY = ((float)b.getShort() / 32768f) * 180f;
+			jnt.rotZ = ((float)b.getShort() / 32768f) * 180f;
 			b.getShort();//Padding
 			//Position
 			jnt.posX = b.getFloat();
