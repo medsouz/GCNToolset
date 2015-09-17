@@ -10,7 +10,9 @@ Tools
 
 **GCMTool** - Allows you to extract, modify, and repack Gamecube disk images
 
-**ExtRARCt** - Lets you extract and create RARC (*.arc) archives.
+**ExtRARCt** - Lets you extract and create RARC (\*.arc) archives.
+
+**MapToIDC** - A really simple program used to convert \*.map files to \*.idc scripts for use in IDA. You can either find these files in games like The Legend of Zelda: The Wind Waker or generate them in Dolphin.
 
 License
 -------
