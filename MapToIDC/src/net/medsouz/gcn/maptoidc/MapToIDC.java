@@ -65,6 +65,6 @@ public class MapToIDC {
 	}
 
 	public static void showUsage() {
-		System.out.println("Usage: idctomap <mapfile> [output=out.idc] [prefix]");
+		System.out.println("Usage: maptoidc <mapfile> [output=out.idc] [prefix]");
 	}
 }
