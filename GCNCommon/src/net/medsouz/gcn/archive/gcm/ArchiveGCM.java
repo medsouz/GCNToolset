@@ -152,6 +152,7 @@ public class ArchiveGCM implements IArchive {
 			}
 			fst.put(stringTable.getBytes());
 			fst.flip();
+			System.out.println(fst.array().length + "=" + fstSize);
 			fc.write(fst);
 			
 			//Update headers to point new locations
@@ -163,27 +164,31 @@ public class ArchiveGCM implements IArchive {
 			positions.flip();
 			fc.write(positions, 0x420);
 			
-			//This single byte of padding solved a crash that was driving me crazy for about 6 hours
-			//ggwp
-			ByteBuffer padding = ByteBuffer.allocate(1);
-			fc.write(padding);
+			int dataStart = (int) fc.position() + 2048 - ((int) fc.position() % 2048);
 			
+			ByteBuffer userLength = ByteBuffer.allocate(4);
+			userLength.putInt(dataStart);
+			userLength.flip();
+			fc.write(userLength, 0x434);
+			
+			fc.position(dataStart);
+			System.out.println("Datastart: 0x" + Integer.toHexString(dataStart));
 			//Fix file offsets and store files
-			int offset = (int) fc.size();
 			for(int f = 0; f < entries.size(); f++) {
 				FileEntry fe = entries.get(f);
 				if(!fe.isDirectory()) {
+					int padd = 2048 - ((int) fc.position() % 2048);
+					ByteBuffer padding = ByteBuffer.allocate(padd);
+					for(int s = 0; s < padd; s++)
+						padding.put((byte) 0);
+					padding.flip();
+					fc.write(padding);
 					ByteBuffer storedOffset = ByteBuffer.allocate(4);
-					fc.read(storedOffset, fstOffset + (f * 12) + 4);
-					storedOffset.flip();
-					int sOff = storedOffset.getInt();
-					storedOffset.flip();
-					sOff += offset;
-					storedOffset.putInt(sOff);
+					storedOffset.putInt((int) fc.position());
 					storedOffset.flip();
 					fc.write(storedOffset, fstOffset + (f * 12) + 4);
-					System.out.println("Writing " + fe.getFile().getName() + "...");
-					ByteUtils.writeFile(fc, fe.getFile());//pls work
+					System.out.println("Writing " + fe.getFile().getName() + " to 0x" + Integer.toHexString((int) fc.position()) + " | FST: 0x" + Integer.toHexString(fstOffset + (f * 12) + 4));
+					ByteUtils.writeFile(fc, fe.getFile());
 				}
 			}
 			
@@ -347,7 +352,7 @@ public class ArchiveGCM implements IArchive {
 					entries.remove(fe);
 					entries.add(currentPos, new FileEntry(true, stringTablePos, parentID, entries.size() + 1, f));
 				} else {
-					int fileSize = (int) f.length();//It should never reach long size...
+					int fileSize = (int) f.length();//It should never be large enough to need a long...
 					FileEntry fe = new FileEntry(false, stringTablePos, fileOffset, fileSize, f);
 					entries.add(fe);
 					fileOffset += fileSize;
