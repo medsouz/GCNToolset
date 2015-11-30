@@ -34,7 +34,6 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
 public class GCMVApp implements ApplicationListener {
@@ -52,8 +51,8 @@ public class GCMVApp implements ApplicationListener {
 	@Override
 	public void create() {
 		cam  = new PerspectiveCamera(75, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		cam.position.set(80f, 80f, 80f);
-		cam.lookAt(0f, 60f, 0f);
+		cam.position.set(100f, 80f, 100f);
+		cam.lookAt(0f, 70f, 0f);
 		cam.near = 0.1f;
 		cam.far = 300.0f;
 		mb = new ModelBatch();
@@ -126,11 +125,12 @@ public class GCMVApp implements ApplicationListener {
 
 	@Override
 	public void render() {
-		cam.rotateAround(Vector3.Zero, new Vector3(0,1,0), 1f);
+		cam.rotateAround(Vector3.Zero, Vector3.Y, 1f);
 		cam.update();
-		
+
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		Gdx.gl.glFrontFace(GL20.GL_CW);
 		
 		mb.begin(cam);
 			for(ModelInstance modelInstance : modelInstances)
