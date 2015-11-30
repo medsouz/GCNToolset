@@ -1,4 +1,4 @@
-package net.medsouz.gcn.gcmtool;
+package net.medsouz.gcn.gcdx;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,11 +9,11 @@ import java.nio.channels.FileChannel;
 import net.medsouz.gcn.archive.gcm.ArchiveGCM;
 import net.medsouz.gcn.util.ByteUtils;
 
-public class GCMTool {
+public class GCDX {
 
 	public static void main(String[] args) {
 		System.out.println("=========================");
-		System.out.println("GCMTool");
+		System.out.println("GCDX");
 		System.out.println("By Matt \"medsouz\" Souza");
 		System.out.println("=========================");
 		
@@ -90,7 +90,7 @@ public class GCMTool {
 	}
 
 	private static void showUsage() {
-		System.out.println("Usage: gcmtool <command> <file> [args...]");
+		System.out.println("Usage: gcdx <command> <file> [args...]");
 		System.out.println("\nCommands:");
 		System.out.println("info\t Information about the disk image");
 		System.out.println("\nextract\t Extract disk filesystem");

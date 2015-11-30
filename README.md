@@ -8,7 +8,7 @@ Tools
 
 **GCNCommon** - A common library for working with the various file formats
 
-**GCMTool** - Allows you to extract, modify, and repack Gamecube disk images
+**GCDX** - Allows you to extract, modify, and repack Gamecube disk images
 
 **ExtRARCt** - Lets you extract and create RARC (\*.arc) archives.
 
