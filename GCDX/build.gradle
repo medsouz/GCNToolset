@@ -3,7 +3,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 1.7
-mainClassName = 'net.medsouz.gcn.gcmtool.GCMTool'
+mainClassName = 'net.medsouz.gcn.gcdx.GCDX'
 version = '1.0'
 jar {
     manifest {
