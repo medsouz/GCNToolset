@@ -1,0 +1,6 @@
+version = '1.0'
+jar {
+	manifest {
+		attributes 'Implementation-Title': 'GCNLib', 'Implementation-Version': version
+	}
+}

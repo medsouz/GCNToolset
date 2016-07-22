@@ -1,28 +1,13 @@
 apply plugin: 'application'
-apply plugin: 'java'
-apply plugin: 'eclipse'
 
-sourceCompatibility = 1.7
 mainClassName = 'net.medsouz.gcn.gcdx.GCDX'
 version = '1.0'
 jar {
-    manifest {
-        attributes 'Implementation-Title': 'GCMTool', 'Implementation-Version': version
-    }
-}
-
-repositories {
-    mavenCentral()
+	manifest {
+		attributes 'Implementation-Title': 'GCMTool', 'Implementation-Version': version
+	}
 }
 
 dependencies {
-	compile project(":GCNCommon")
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src/'
-        }
-    }
+	compile project(":GCNLib")
 }
