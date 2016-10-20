@@ -1,5 +1,3 @@
 include "GCNLib"
-include "ExtRARCt"
-include "GCDX"
-include "GCMV"
-include "MapToIDC"
+include "GCNToolset"
+include ":Tools:GCDX"

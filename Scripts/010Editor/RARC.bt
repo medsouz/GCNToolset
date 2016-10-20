@@ -1,0 +1,125 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: RARC.bt
+//   Authors: medsouz
+//   Version: 0.1
+//   Purpose: Parse the Nintendo RARC archives
+//  Category: Archive
+// File Mask: *.arc
+//  ID Bytes: 
+//   History: 
+//   0.1   Initial release.
+//------------------------------------------------
+BigEndian();
+
+typedef struct {
+    char header[4];// "RARC"
+    int size;
+    int unknown;
+    int dataOffset <read=AddHex20>;
+    int unknown1[4];
+    int numNodes;
+    int unknown2[2];
+    int fileEntriesOffset <read=AddHex20>;
+    int unknown3;
+    int stringTableOffset <read=AddHex20>;
+    int unknown4[2];
+} HEADER;
+
+typedef struct {
+    char type[4];
+    int nameOffset <read=GetStringOffset>;
+    short hash <format=hex>;
+    short numFiles;
+    int firstFileEntryOffset;
+} NODE <read=GetNodeName>;
+
+typedef struct {
+    short id; //file id. If this is 0xFFFF, then this entry is a subdirectory link
+    short hash <format=hex>;;
+    short type <format=hex>;
+    short nameOffset <read=GetStringOffsetShort>;
+    int dataOffset;
+    int dataSize;
+    int padding;
+} FILE_ENTRY <read=GetFileEntryName>;
+
+//Some offsets are stored incorrectly and need to have 0x20 added to them
+string AddHex20(int &val) {
+    string s;
+    SPrintf(s, "%Xh", val + 0x20);
+    return s;
+}
+
+string GetStringOffset(int &offset) {
+    string s;
+    SPrintf(s, "%Xh", header.stringTableOffset + 0x20 + offset);
+    return s;
+}
+
+string GetStringOffsetShort(short &offset) {
+    string s;
+    SPrintf(s, "%Xh", header.stringTableOffset + 0x20 + offset);
+    return s;
+}
+
+string GetNodeName(NODE &node) {
+    return ReadString(header.stringTableOffset + 0x20 + node.nameOffset);
+}
+
+char compareFileEntries(FILE_ENTRY &a, FILE_ENTRY &b) {
+    return (
+        a.id == b.id &&
+        a.hash == b.hash &&
+        a.type == b.type &&
+        a.nameOffset == b.nameOffset &&
+        a.dataOffset == b.dataOffset &&
+        a.dataSize == b.dataSize
+    );
+}
+
+int GetNodeFromFileEntry(int index) {
+    int n;
+    for(n = 0; n < header.numNodes; n++) {
+        if(index >= nodes[n].firstFileEntryOffset && index < nodes[n].firstFileEntryOffset + nodes[n].numFiles)
+            return n;
+    }
+    return -1;
+}
+
+string GetParentNodes(int nodeIndex) {
+    if(nodeIndex != -1) {
+        string out = GetNodeName(nodes[nodeIndex]) + "/";
+    
+        int parent = fileEntries[nodes[nodeIndex].firstFileEntryOffset + nodes[nodeIndex].numFiles - 1].dataOffset;
+        return GetParentNodes(parent) + out;
+    }
+    return "/";
+}
+
+string GetFileEntryName(FILE_ENTRY &fEntry) {
+    int i;
+    for(i = 0; i < numFiles; i++) {
+        if(compareFileEntries(fileEntries[i], fEntry))
+            break;
+    }
+
+    string out = ReadString(header.stringTableOffset + 0x20 + fEntry.nameOffset);
+    if(fEntry.type == 0x200) //Folder
+        out += "/";
+
+    int n = GetNodeFromFileEntry(i);
+    return GetParentNodes(n) + out;
+}
+
+HEADER header;
+NODE nodes[header.numNodes];
+//Read file entries
+FSeek(header.fileEntriesOffset + 0x20);
+local int numFiles = 0;
+local int n;
+for(n = 0; n < header.numNodes; n++)
+    numFiles += nodes[n].numFiles;
+
+FILE_ENTRY fileEntries[numFiles];

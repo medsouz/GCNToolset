@@ -1,0 +1,15 @@
+apply plugin: 'application'
+
+mainClassName = 'net.medsouz.gcn.gcdx.GCDX'
+version = '1.0'
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'GCDX', 'Implementation-Version': version
+    }
+}
+
+dependencies {
+    compile project(':GCNLib')
+    compile 'com.beust:jcommander:1.48'
+}

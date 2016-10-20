@@ -1,0 +1,156 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: GCM.bt
+//   Authors: medsouz
+//   Version: 0.1
+//   Purpose: Parse the filesystem of Nintendo Gamecube disk images
+//  Category: Drives
+// File Mask: *.iso, *.gcm
+//  ID Bytes: 
+//   History: 
+//   0.1   Initial release.
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct {
+    char ConsoleID[1]; // "G" for Gamecube games, "P" for promotional disks?
+    char GameCode[2];
+    char LanguageCode[1]; // "E" for English, "J" for Japanese, "P" for PAL (multiple languages), ...
+    char MakerCode[2]; // Example: Every first party Nintendo game ends in 01
+} GameID <read=ReadGameID>;
+
+string ReadGameID(GameID &gameID) {
+    return gameID.ConsoleID + gameID.GameCode + gameID.LanguageCode + gameID.MakerCode;
+}
+
+typedef struct {
+    GameID gameID;
+
+    //Game information
+    byte DiskID; //The disk number used for multi disk games
+    byte Version;
+    byte AudioStreaming;
+    byte StreamBufferSize;
+    byte padding[0x12] <hidden=true>;
+    int MagicWord <format=hex>; //0xc2339f3d
+    char GameName[0x03e0];
+    int DebugMonitorOffset <format=hex>;
+    int DebugMonitorLoadAddress <format=hex>;
+    byte padding1[0x18] <hidden=true>;
+    int DOLOffset <format=hex>; // Main Executable
+    int FSTOffset <format=hex>; // File System Tree
+    int FSTSize;
+    int FSTMaxSize; // Should be the same FSTSize if it isn't a multi disk game
+    int UserPosition <format=hex>;
+    int UserLength;
+    int unknown;
+    byte padding2[0x4] <hidden=true>;
+} DISK_HEADER <read=ReadDiskHeader>;
+
+string ReadDiskHeader(DISK_HEADER &header) {
+    return ReadGameID(header.gameID) + " - " + header.GameName;
+}
+
+typedef struct {
+    int DebugMonitorSize;
+    int SimulatedMemorySize;
+    int ArgumentOffset;
+    int DebugFlag;
+    int TrackLocation;
+    int TrackSize;
+    int Countrycode;
+    int unknown;
+    byte padding[0x1FE0] <hidden=true>;
+} DISK_HEADER_INFORMATION;
+
+typedef struct {
+    char version[10];
+    char padding[6];
+    int EntryPoint <format=hex>;
+    int Size;
+    int TrailerSize;
+    byte apploader[Size + TrailerSize];
+} APPLOADER <read=ReadApploader>;
+
+string ReadApploader(APPLOADER &apploader) {
+    return apploader.version;
+}
+
+typedef struct {
+    byte flags <read=ReadFSTEntryFlags>; //0 = file, 1 = directory
+    unsigned char fileNameOffset[3];
+    int offset; //File data offset or parent offset in FST
+    int length; //File size or number of entries in directory
+} FSTEntry;
+
+string ReadFSTEntryFlags(byte &flags) {
+    return (flags == 0) ? "File" : "Directory";
+}
+
+int ParseFileNameOffset(unsigned char fileNameOffset[]) {
+    return (((int) fileNameOffset[0]) << 16) | (((int) fileNameOffset[1]) << 8) | ((int) fileNameOffset[2]);
+}
+
+//yikes
+//TODO: Fix files in the root directory being shown in the previous directory
+string GetFSTFileName(FSTEntry &fstEntry) {
+    string out = "";
+    int i = ParseFileNameOffset(fstEntry.fileNameOffset);
+    while(stringtable[i] != 0) {
+        out += stringtable[i];
+        i++;
+    }
+    int current = fstEntry.offset;
+    if(fstEntry.flags == 0) {
+        for(i = 0; i < rootEntry.length - 1; i++) {
+            if(filesystem[i].offset == fstEntry.offset) {
+                current = i;
+                break;
+            }
+        }
+    }
+
+    if(current > 0) {
+        if(filesystem[current - 1].flags == 0) {
+            int next = current;
+            while(next > 0 && filesystem[next - 1].flags != 1) {
+                next--;
+            }
+            current = next;
+        }
+
+        //TODO: Fix this hack
+        if(current > 0) {
+            out = GetFSTFileName(filesystem[current - 1]) + out;
+        } else {
+            out = "/" + out;
+        }
+    } else {
+        out = "/" + out;
+    }
+
+    if(fstEntry.flags == 1) {
+        out += "/";
+    }
+   
+    return out;
+}
+
+DISK_HEADER bootBin;
+DISK_HEADER_INFORMATION bi2Bin;
+APPLOADER appldrBin;
+
+FSeek(bootBin.FSTOffset);
+FSTEntry rootEntry;
+
+//Read FST stringtable
+local int FSTEntrySize = rootEntry.length * 0xC;
+FSeek(bootBin.FSTOffset + FSTEntrySize);
+char stringtable[bootBin.FSTSize - FSTEntrySize];
+
+//Go back to the FST
+FSeek(bootBin.FSTOffset + 0xC);
+FSTEntry filesystem[rootEntry.length - 1] <read=GetFSTFileName>;
+

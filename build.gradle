@@ -1,4 +1,11 @@
-subprojects {
+def getProjects() {
+	// Make sure a project has a src directory before trying to build it
+	return subprojects.findAll {
+		new File(it.projectDir, "src").exists()
+	}
+}
+
+configure (getProjects()) {
 	apply plugin: 'java'
 
 	sourceCompatibility = 1.7
@@ -6,13 +13,5 @@ subprojects {
 
 	repositories {
 		mavenCentral()
-	}
-
-	sourceSets {
-		main {
-			java {
-				srcDir 'src/'
-			}
-		}
 	}
 }

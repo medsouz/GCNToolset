@@ -2,11 +2,10 @@
 .project
 .metadata/
 .settings/
+.gradle/
 */bin/
-*/build/
-*/.gradle/
+**/build/
 */.settings/
 */.project
 */.classpath
-/build/
 .idea/

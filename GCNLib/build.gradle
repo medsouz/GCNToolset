@@ -1,6 +1,10 @@
-version = '1.0'
+version = '0.1'
 jar {
 	manifest {
 		attributes 'Implementation-Title': 'GCNLib', 'Implementation-Version': version
 	}
+}
+
+dependencies {
+	compile 'org.javolution:javolution:5.2.6'
 }
