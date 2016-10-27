@@ -18,13 +18,17 @@ typedef struct {
     int size;
     int unknown;
     int dataOffset <read=AddHex20>;
-    int unknown1[4];
+    int dataLength;
+    int dataLength2;
+    int padding[2];
     int numNodes;
-    int unknown2[2];
+    int nodeOffset <read=AddHex20>;
+    int fileEntriesCount;
     int fileEntriesOffset <read=AddHex20>;
-    int unknown3;
+    int stringTableLength;
     int stringTableOffset <read=AddHex20>;
-    int unknown4[2];
+    int unknown;
+    int padding2;
 } HEADER;
 
 typedef struct {
