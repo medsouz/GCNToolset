@@ -56,7 +56,8 @@ public class MainController implements Initializable {
 			if(ext.equals(".arc")) {
 				RARCArchive rarcArchive = new RARCArchive();
 				if(rarcArchive.read(new BufferFile(archive.getFile(root)))) {
-					setFileTree(rarcArchive.getFilesystem(), item, rarcArchive);
+					for(FileEntry fe : rarcArchive.getFilesystem().getChildren())
+						setFileTree(fe, item, rarcArchive);
 				}
 			}
 		}
