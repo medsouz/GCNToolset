@@ -14,6 +14,20 @@ buildscript {
 	}
 }
 
+dependencies {
+	compile project(':GCNLib')
+}
+
+sourceSets {
+	main {
+		resources.srcDirs =
+				[
+						"src/main/resources",
+						"src/main/resources/silk_icons"
+				]
+	}
+}
+
 apply plugin: 'javafx-gradle-plugin'
 
 jfx {

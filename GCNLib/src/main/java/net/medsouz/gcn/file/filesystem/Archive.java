@@ -12,4 +12,5 @@ public abstract class Archive {
 
 	public abstract FileEntry getFilesystem();
 	public abstract ByteBuffer getFile(FileEntry file);
+	public abstract String getName();
 }

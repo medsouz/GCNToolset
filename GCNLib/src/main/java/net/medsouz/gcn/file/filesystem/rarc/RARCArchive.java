@@ -33,6 +33,11 @@ public class RARCArchive extends Archive {
 		return null;
 	}
 
+	@Override
+	public String getName() {
+		return "";
+	}
+
 	public static short getHash(String name) {
 		short hash = 0;
 		for(byte c : name.getBytes()) {

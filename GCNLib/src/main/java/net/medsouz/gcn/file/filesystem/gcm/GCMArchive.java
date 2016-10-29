@@ -189,6 +189,11 @@ public class GCMArchive extends Archive {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return (header != null) ? header.toString() : "null";
+	}
+
 	private String getStringFromStringtable(int offset) {
 		String out = "";
 		if(stringtable != null) {
