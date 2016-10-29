@@ -7,10 +7,12 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import net.medsouz.gcn.file.BufferFile;
 import net.medsouz.gcn.file.ChannelFile;
 import net.medsouz.gcn.file.filesystem.Archive;
 import net.medsouz.gcn.file.filesystem.FileEntry;
 import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
+import net.medsouz.gcn.file.filesystem.rarc.RARCArchive;
 
 import java.io.File;
 import java.net.URL;
@@ -38,19 +40,25 @@ public class MainController implements Initializable {
 	public TreeItem<String> getFileTree(Archive archive) {
 		TreeItem<String> rootItem = new TreeItem<>(archive.getName(), new ImageView(FileRegistry.lookup(".gcm").getImage()));
 		for(FileEntry item : archive.getFilesystem().getChildren())
-			setFileTree(item, rootItem);
+			setFileTree(item, rootItem, archive);
 		return rootItem;
 	}
 
-	public static void setFileTree(FileEntry root, TreeItem<String> parent) {
+	public static void setFileTree(FileEntry root, TreeItem<String> parent, Archive archive) {
 		TreeItem<String> item = new TreeItem<>(root.getName());
-		item.setExpanded(true);
 		if(root.isDirectory()) {
 			item.setGraphic(new ImageView(new Image(MainController.class.getClass().getResourceAsStream("/silk_icons/folder.png"))));
 			for(FileEntry fileEntry : root.getChildren())
-				setFileTree(fileEntry, item);
+				setFileTree(fileEntry, item, archive);
 		} else {
-			item.setGraphic(new ImageView(FileRegistry.lookup(root.getName().substring(root.getName().lastIndexOf(".")).toLowerCase()).getImage()));
+			String ext = root.getName().substring(root.getName().lastIndexOf(".")).toLowerCase();
+			item.setGraphic(new ImageView(FileRegistry.lookup(ext).getImage()));
+			if(ext.equals(".arc")) {
+				RARCArchive rarcArchive = new RARCArchive();
+				if(rarcArchive.read(new BufferFile(archive.getFile(root)))) {
+					setFileTree(rarcArchive.getFilesystem(), item, rarcArchive);
+				}
+			}
 		}
 		parent.getChildren().add(item);
 	}

@@ -182,7 +182,12 @@ public class GCMArchive extends Archive {
 	public ByteBuffer getFile(FileEntry file) {
 		if(file instanceof GCMFileEntry) {
 			GCMFileEntry gcmFile = (GCMFileEntry) file;
-			return archiveFile.getBuffer(fst[gcmFile.getFSTIndex()].length.get(), fst[gcmFile.getFSTIndex()].offset.get());
+			if(!file.isDirectory()) {
+				return archiveFile.getBuffer(fst[gcmFile.getFSTIndex()].length.get(), fst[gcmFile.getFSTIndex()].offset.get());
+			} else {
+				System.err.println("GCMFileEntry is not a file");
+				return null;
+			}
 		} else {
 			System.err.println("Not a GCMFileEntry");
 			return null;
