@@ -4,15 +4,8 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import net.medsouz.gcn.file.ChannelFile;
-import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
-
-import java.io.File;
 
 public class GCNToolset extends Application {
 	public static void main(String[] args) {
@@ -23,7 +16,7 @@ public class GCNToolset extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("main.fxml"));
 
-		MainController mainController = new MainController();
+		MainController mainController = new MainController(primaryStage);
 		loader.setController(mainController);
 		Parent root = loader.load();
 		Scene scene = new Scene(root, 800, 600);
