@@ -13,11 +13,13 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import net.medsouz.gcn.file.BufferFile;
 import net.medsouz.gcn.file.ChannelFile;
+import net.medsouz.gcn.file.FileFormatRegistry;
 import net.medsouz.gcn.file.filesystem.Archive;
 import net.medsouz.gcn.file.filesystem.FileEntry;
 import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
 import net.medsouz.gcn.file.filesystem.rarc.RARCArchive;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -38,12 +40,18 @@ public class MainController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		menuOpen.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent actionEvent) {
-				GCMArchive archive = new GCMArchive();
 				try {
 					FileChooser fileChooser = new FileChooser();
-					fileChooser.setTitle("Open Gamecube ROM File");
-					archive.read(new ChannelFile(fileChooser.showOpenDialog(stage)));
-					fileTree.setRoot(getFileTree(archive));
+					fileChooser.setTitle("Open File");
+					File selected = fileChooser.showOpenDialog(stage);
+
+					String ext = selected.getName().substring(selected.getName().lastIndexOf(".")).toLowerCase();
+					FileFormatRegistry format = FileFormatRegistry.lookup(ext);
+					if(format.isExtending(Archive.class)) {
+						Archive archive = (Archive)format.getInstance();
+						archive.read(new ChannelFile(selected));
+						fileTree.setRoot(getFileTree(archive, ext));
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -52,8 +60,8 @@ public class MainController implements Initializable {
 	}
 
 
-	public TreeItem<String> getFileTree(Archive archive) {
-		TreeItem<String> rootItem = new TreeItem<>(archive.getName(), new ImageView(FileRegistry.lookup(".gcm").getImage()));
+	public TreeItem<String> getFileTree(Archive archive, String ext) {
+		TreeItem<String> rootItem = new TreeItem<>(archive.getName(), new ImageView(FileIconRegistry.lookup(ext).getImage()));
 		for(FileEntry item : archive.getFilesystem().getChildren())
 			setFileTree(item, rootItem, archive);
 		return rootItem;
@@ -67,12 +75,13 @@ public class MainController implements Initializable {
 				setFileTree(fileEntry, item, archive);
 		} else {
 			String ext = root.getName().substring(root.getName().lastIndexOf(".")).toLowerCase();
-			item.setGraphic(new ImageView(FileRegistry.lookup(ext).getImage()));
-			if(ext.equals(".arc")) {
-				RARCArchive rarcArchive = new RARCArchive();
-				if(rarcArchive.read(new BufferFile(archive.getFile(root)))) {
-					for(FileEntry fe : rarcArchive.getFilesystem().getChildren())
-						setFileTree(fe, item, rarcArchive);
+			item.setGraphic(new ImageView(FileIconRegistry.lookup(ext).getImage()));
+			FileFormatRegistry format = FileFormatRegistry.lookup(ext);
+			if(format.isExtending(Archive.class)) {
+				Archive nestedArchive = (Archive)format.getInstance();
+				if(nestedArchive.read(new BufferFile(archive.getFile(root)))) {
+					for(FileEntry fe : nestedArchive.getFilesystem().getChildren())
+						setFileTree(fe, item, nestedArchive);
 				}
 			}
 		}

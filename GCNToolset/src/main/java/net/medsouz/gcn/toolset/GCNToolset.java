@@ -22,7 +22,7 @@ public class GCNToolset extends Application {
 		Scene scene = new Scene(root, 800, 600);
 
 		primaryStage.setTitle("Gamecube Toolset");
-		primaryStage.getIcons().add(new Image(FileRegistry.class.getClass().getResourceAsStream("/silk_icons/wrench.png")));
+		primaryStage.getIcons().add(new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/wrench.png")));
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
