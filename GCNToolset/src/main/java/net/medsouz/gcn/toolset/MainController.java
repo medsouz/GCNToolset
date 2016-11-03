@@ -29,6 +29,8 @@ public class MainController implements Initializable {
 	private TreeView<String> fileTree;
 	@FXML
 	private MenuItem menuOpen;
+	@FXML
+	private MenuItem menuClose;
 
 	public MainController(Stage stage) {
 		this.stage = stage;
@@ -55,6 +57,12 @@ public class MainController implements Initializable {
 				}
 			}
 		});
+
+		menuClose.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent actionEvent) {
+				fileTree.setRoot(null);
+			}
+		});
 	}
 
 
@@ -72,7 +80,8 @@ public class MainController implements Initializable {
 			for(FileEntry fileEntry : root.getChildren())
 				setFileTree(fileEntry, item, archive);
 		} else {
-			String ext = root.getName().substring(root.getName().lastIndexOf(".")).toLowerCase();
+			int extOffset = root.getName().lastIndexOf(".");
+			String ext = (extOffset != -1) ? root.getName().substring(extOffset).toLowerCase() : "?";
 			item.setGraphic(new ImageView(FileIconRegistry.lookup(ext).getImage()));
 			FileFormatRegistry format = FileFormatRegistry.lookup(ext);
 			if(format.isExtending(Archive.class)) {
