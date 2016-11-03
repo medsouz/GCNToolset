@@ -16,8 +16,6 @@ import net.medsouz.gcn.file.ChannelFile;
 import net.medsouz.gcn.file.FileFormatRegistry;
 import net.medsouz.gcn.file.filesystem.Archive;
 import net.medsouz.gcn.file.filesystem.FileEntry;
-import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
-import net.medsouz.gcn.file.filesystem.rarc.RARCArchive;
 
 import java.io.File;
 import java.net.URL;

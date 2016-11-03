@@ -11,7 +11,10 @@ public class FileFormatRegistry<T extends FileFormat> {
 	static {
 		map.put("?", new FileFormatRegistry<>("Unknown Format", FileFormat.class));
 		map.put(".arc", new FileFormatRegistry<>("RARC Archive", RARCArchive.class));
-		map.put(".gcm", new FileFormatRegistry<>("Gamecube Disk", GCMArchive.class));
+		//*.gcm files may have the *.iso extension
+		FileFormatRegistry gcm = new FileFormatRegistry<>("Gamecube Disk", GCMArchive.class);
+		map.put(".gcm", gcm);
+		map.put(".iso", gcm);
 	}
 
 	public static FileFormatRegistry lookup(String key) {

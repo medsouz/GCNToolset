@@ -21,7 +21,10 @@ public class FileIconRegistry {
 		map.put(".bnr", new FileIconRegistry("Banner", new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/tag_green.png"))));
 		map.put(".bti", new FileIconRegistry("Texture", new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/picture.png"))));
 		map.put(".btp", new FileIconRegistry("Texture Animation", new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/picture_go.png"))));
-		map.put(".gcm", new FileIconRegistry("Gamecube Disk", new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/cd.png"))));
+		//*.gcm files may have the *.iso extension
+		FileIconRegistry gcm = new FileIconRegistry("Gamecube Disk", new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/cd.png")));
+		map.put(".gcm", gcm);
+		map.put(".iso", gcm);
 		map.put(".map", new FileIconRegistry("Debug Symbols", new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/page_white_code.png"))));
 		map.put(".thp", new FileIconRegistry("Movie", new Image(FileIconRegistry.class.getClass().getResourceAsStream("/silk_icons/film.png"))));
 	}
