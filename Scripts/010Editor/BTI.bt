@@ -1,0 +1,76 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: BTI.bt
+//   Authors: medsouz
+//   Version: 0.1
+//   Purpose: Parses Nintendo Gamecube BTI images
+//  Category: Image
+// File Mask: *.bti
+//  ID Bytes: 
+//   History: 
+//   0.1   Initial release.
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct {
+    byte imageFormat <read=ReadImageFormat>;
+    byte enableAlpha;
+    short width;
+    short height;
+    byte wrap_s;
+    byte wrap_t;
+    short paletteFormat;
+    short paletteCount;
+    int paletteOffset;
+    int unknown;
+    byte magnificationFilterType <read=ReadFilterType>;
+    byte minificationFilterType <read=ReadFilterType>;
+    short unknown2;
+    byte imageCount;
+    byte unknown3;
+    short unknown4;
+    int dataOffset;
+} HEADER;
+
+string ReadImageFormat(byte &format) {
+    switch(format) {
+        case 0:
+            return "I4";
+        case 1:
+            return "I8";
+        case 2:
+            return "IA4";
+        case 3:
+            return "IA8";
+        case 4:
+            return "RGB565";
+        case 5:
+            return "RGB5A3";
+        case 6:
+            return "RGBA32";
+        case 8:
+            return "CI4";
+        case 9:
+            return "CI8";
+        case 10:
+            return "CI14X2";
+        case 14:
+            return "CMPR";
+    }
+    return "Unknown";    
+}
+
+
+string ReadFilterType(byte &filter) {
+    switch(filter) {
+        case 0:
+            return "Nearest";
+        case 1:
+            return "Linear";
+    }
+    return "Unknown";
+}
+
+HEADER header;
