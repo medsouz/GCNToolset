@@ -1,6 +1,6 @@
 package net.medsouz.gcn.file.filesystem.gcm;
 
-import net.medsouz.gcn.file.GCNFile;
+import net.medsouz.gcn.file.io.GCNFile;
 import net.medsouz.gcn.file.filesystem.Archive;
 import net.medsouz.gcn.file.filesystem.FileEntry;
 import net.medsouz.gcn.file.filesystem.gcm.struct.*;

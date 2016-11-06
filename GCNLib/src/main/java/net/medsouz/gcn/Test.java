@@ -1,18 +1,7 @@
 package net.medsouz.gcn;
 
-import net.medsouz.gcn.file.BufferFile;
-import net.medsouz.gcn.file.ChannelFile;
 import net.medsouz.gcn.file.filesystem.FileEntry;
 import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
-import net.medsouz.gcn.file.filesystem.gcm.struct.DiskHeader;
-import net.medsouz.gcn.file.filesystem.rarc.RARCArchive;
-import net.medsouz.gcn.util.ByteUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 
 public class Test {
 	public static void main(String[] args) {
@@ -30,7 +19,6 @@ public class Test {
 			//printFileTree(archive.getFilesystem(), 0);
 			//archive.extract(archive.getFilesystem(), new File("X:\\working_dir\\test\\"));
 			//archive.create(new File("X:\\working_dir\\test\\GM4E01\\"), new File("X:\\working_dir\\output.iso"));
-			System.out.println(Integer.toHexString(RARCArchive.getHash("effect") & 0xffff));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

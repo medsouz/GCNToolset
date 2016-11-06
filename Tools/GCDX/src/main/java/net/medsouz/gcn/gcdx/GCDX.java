@@ -1,13 +1,8 @@
 package net.medsouz.gcn.gcdx;
 
 import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import net.medsouz.gcn.file.ChannelFile;
-import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
 import net.medsouz.gcn.gcdx.commands.CommandCreate;
 import net.medsouz.gcn.gcdx.commands.CommandExtract;
-
-import java.io.File;
 
 public class GCDX {
 	public static void main(String[] args) {

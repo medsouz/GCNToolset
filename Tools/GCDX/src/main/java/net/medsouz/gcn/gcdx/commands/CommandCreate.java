@@ -3,7 +3,6 @@ package net.medsouz.gcn.gcdx.commands;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import net.medsouz.gcn.file.ChannelFile;
 import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
 
 import java.io.File;

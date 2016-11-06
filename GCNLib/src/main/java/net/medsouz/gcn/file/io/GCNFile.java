@@ -1,4 +1,4 @@
-package net.medsouz.gcn.file;
+package net.medsouz.gcn.file.io;
 
 import javolution.io.Struct;
 

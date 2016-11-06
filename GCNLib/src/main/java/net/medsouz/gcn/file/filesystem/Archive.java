@@ -1,7 +1,7 @@
 package net.medsouz.gcn.file.filesystem;
 
 import net.medsouz.gcn.file.FileFormat;
-import net.medsouz.gcn.file.GCNFile;
+import net.medsouz.gcn.file.io.GCNFile;
 
 import java.io.File;
 import java.nio.ByteBuffer;

@@ -1,9 +1,8 @@
 package net.medsouz.gcn.file.filesystem.rarc;
 
-import net.medsouz.gcn.file.GCNFile;
+import net.medsouz.gcn.file.io.GCNFile;
 import net.medsouz.gcn.file.filesystem.Archive;
 import net.medsouz.gcn.file.filesystem.FileEntry;
-import net.medsouz.gcn.file.filesystem.gcm.GCMFileEntry;
 import net.medsouz.gcn.file.filesystem.rarc.struct.Entry;
 import net.medsouz.gcn.file.filesystem.rarc.struct.Header;
 import net.medsouz.gcn.file.filesystem.rarc.struct.Node;
