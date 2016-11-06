@@ -19,6 +19,7 @@ import net.medsouz.gcn.file.filesystem.FileEntry;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -43,14 +44,22 @@ public class MainController implements Initializable {
 				try {
 					FileChooser fileChooser = new FileChooser();
 					fileChooser.setTitle("Open File");
-					File selected = fileChooser.showOpenDialog(stage);
 
-					String ext = selected.getName().substring(selected.getName().lastIndexOf(".")).toLowerCase();
-					FileFormatRegistry format = FileFormatRegistry.lookup(ext);
-					if(format.isExtending(Archive.class)) {
-						Archive archive = (Archive)format.getInstance();
-						archive.read(new ChannelFile(selected));
-						fileTree.setRoot(getFileTree(archive, ext));
+					HashMap<String, FileFormatRegistry> map = FileFormatRegistry.getFormats();
+					for(String format : map.keySet()) {
+						if(format.contains("."))
+							fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(map.get(format).getName(), "*" + format));
+					}
+
+					File selected = fileChooser.showOpenDialog(stage);
+					if(selected != null) {
+						String ext = selected.getName().substring(selected.getName().lastIndexOf(".")).toLowerCase();
+						FileFormatRegistry format = FileFormatRegistry.lookup(ext);
+						if (format.isExtending(Archive.class)) {
+							Archive archive = (Archive) format.getInstance();
+							archive.read(new ChannelFile(selected));
+							fileTree.setRoot(getFileTree(archive, ext));
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

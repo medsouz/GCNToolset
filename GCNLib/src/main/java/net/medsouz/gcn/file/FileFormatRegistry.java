@@ -24,6 +24,10 @@ public class FileFormatRegistry<T extends FileFormat> {
 			return map.get("?");
 	}
 
+	public static HashMap<String, FileFormatRegistry> getFormats() {
+		return map;
+	}
+
 	private String name;
 	private Class<T> format;
 
