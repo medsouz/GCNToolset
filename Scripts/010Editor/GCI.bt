@@ -1,0 +1,81 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: GCI.bt
+//   Authors: medsouz
+//   Version: 0.1
+//   Purpose: Parses Nintendo Gamecube memory card GCI format
+//  Category: Gamecube
+// File Mask: *.gci
+//  ID Bytes: 
+//   History: 
+//   0.1   Initial release.
+//------------------------------------------------
+
+/*
+
+https://github.com/dolphin-emu/dolphin/blob/4eb5892e1a54ae9616d90cd438f3877af8e1dd03/Source/Core/Core/HW/GCMemcard.h
+
+*/
+BigEndian();
+
+typedef struct {
+    char ConsoleID[1]; // "G" for Gamecube games, "P" for promotional disks?
+    char GameCode[2];
+    char LanguageCode[1]; // "E" for English, "J" for Japanese, "P" for PAL (multiple languages), ...
+    char MakerCode[2]; // Example: Every first party Nintendo game ends in 01
+} GameID <read=ReadGameID>;
+
+string ReadGameID(GameID &gameID) {
+    return gameID.ConsoleID + gameID.GameCode + gameID.LanguageCode + gameID.MakerCode;
+}
+
+string ReadGamecubeTime(int &time) {
+    //Time since 12AM on 1/1/2000. "Gamecube Time"
+    return TimeTToString((time_t)(time + 946702800));
+}
+typedef struct {
+    GameID id;
+    char unused <format=hex>; //Always 0xFF
+    char bannerFlags <format=binary>; //banner gfx format and icon animation (Image Key)
+    //      Bit(s)  Description
+    //      2       Icon Animation 0: forward 1: ping-pong
+    //      1       [--0: No Banner 1: Banner present--] WRONG! YAGCD LIES!
+    //      0       [--Banner Color 0: RGB5A3 1: CI8--]  WRONG! YAGCD LIES!
+    //      bits 0 and 1: image format
+    //      00 no banner
+    //      01 CI8 banner
+    //      10 RGB5A3 banner
+    //      11 ? maybe ==00? Time Splitters 2 and 3 have it and don't have banner
+    char fileName[0x20];
+    int lastModified <read=ReadGamecubeTime>;
+    int imageOffset <format=hex>;
+    short iconFormat <format=binary>;//icon gfx format (2bits per icon)
+    //      Bits    Description
+    //      00      No icon
+    //      01      CI8 with a shared color palette after the last frame
+    //      10      RGB5A3
+    //      11      CI8 with a unique color palette after itself
+    short animationSpeed <format=binary>;//Animation speed (2bits per icon) (*1)
+    //      Bits    Description
+    //      00      No icon
+    //      01      Icon lasts for 4 frames
+    //      10      Icon lasts for 8 frames
+    //      11      Icon lasts for 12 frames
+    char permissions <format=binary>; //File-permissions
+    //      Bit Permission  Description
+    //      4   no move     File cannot be moved by the IPL
+    //      3   no copy     File cannot be copied by the IPL
+    //      2   public      Can be read by any game
+    char copyCounter;
+    short firstBlockOffset <format=hex>;
+    short blockCount;
+    short unused2 <format=hex>;//Always 0xFFFFFFFF
+    int commentsOffset <format=hex>;
+} GCIHeader;
+
+
+GCIHeader header;
+FSeek(header.commentsOffset + 0x40);
+char GameName[0x20];
+char Comment[0x20];
