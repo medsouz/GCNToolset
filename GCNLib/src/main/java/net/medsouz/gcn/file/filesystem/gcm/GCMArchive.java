@@ -136,7 +136,7 @@ public class GCMArchive extends Archive {
 							ByteUtils.writeBufferToFile(new File(directory, "boot.bin"), header.getByteBuffer());
 							ByteUtils.writeBufferToFile(new File(directory, "bi2.bin"), info.getByteBuffer());
 							ByteUtils.writeBufferToFile(new File(directory, "appldr.bin"), archiveFile.getBuffer(appLoader.size() + appLoader.size.get() + appLoader.trailerSize.get(), 0x2440));
-							ByteUtils.writeBufferToFile(new File(directory, "main.dol"), archiveFile.getBuffer(dol.getDOLSize(), header.DOLOffset.get()));
+							extractDOL(new File(directory, "main.dol"));
 						} catch (IOException err) {
 							err.printStackTrace();
 							return false;
@@ -261,5 +261,9 @@ public class GCMArchive extends Archive {
 			fst.entries.add(entry);
 		}
 		return fst;
+	}
+
+	public void extractDOL(File out) throws IOException {
+		ByteUtils.writeBufferToFile(out, archiveFile.getBuffer(dol.getDOLSize(), header.DOLOffset.get()));
 	}
 }

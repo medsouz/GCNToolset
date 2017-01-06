@@ -11,6 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import net.medsouz.gcn.file.filesystem.gcm.GCMArchive;
 import net.medsouz.gcn.file.io.BufferFile;
 import net.medsouz.gcn.file.io.ChannelFile;
 import net.medsouz.gcn.file.FileFormatRegistry;
@@ -18,6 +19,7 @@ import net.medsouz.gcn.file.filesystem.Archive;
 import net.medsouz.gcn.file.filesystem.FileEntry;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.ResourceBundle;
@@ -32,6 +34,10 @@ public class MainController implements Initializable {
 	private MenuItem menuOpen;
 	@FXML
 	private MenuItem menuClose;
+	@FXML
+	private MenuItem menuExtractDOL;
+
+	private Archive archive;
 
 	public MainController(Stage stage) {
 		this.stage = stage;
@@ -56,7 +62,7 @@ public class MainController implements Initializable {
 						String ext = selected.getName().substring(selected.getName().lastIndexOf(".")).toLowerCase();
 						FileFormatRegistry format = FileFormatRegistry.lookup(ext);
 						if (format.isExtending(Archive.class)) {
-							Archive archive = (Archive) format.getInstance();
+							archive = (Archive) format.getInstance();
 							archive.read(new ChannelFile(selected));
 							fileTree.setRoot(getFileTree(archive, ext));
 						}
@@ -70,6 +76,22 @@ public class MainController implements Initializable {
 		menuClose.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent actionEvent) {
 				fileTree.setRoot(null);
+			}
+		});
+
+		menuExtractDOL.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent actionEvent) {
+				if(archive != null && archive instanceof GCMArchive) {
+					FileChooser fileChooser = new FileChooser();
+					fileChooser.setTitle("Extract DOL File");
+					fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("DOL", "*.dol"));
+					File location = fileChooser.showSaveDialog(stage);
+					try {
+						((GCMArchive) archive).extractDOL(location);
+					} catch(IOException err) {
+						err.printStackTrace();
+					}
+				}
 			}
 		});
 	}

@@ -18,11 +18,16 @@
                     <MenuItem fx:id="menuClose" mnemonicParsing="false" text="Close" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Help">
+                <Menu mnemonicParsing="false" text="ROM">
                   <items>
-                    <MenuItem fx:id="menuAbout" mnemonicParsing="false" text="About" />
+                    <MenuItem fx:id="menuExtractDOL" mnemonicParsing="false" text="Extract DOL" />
                   </items>
                 </Menu>
+                  <Menu mnemonicParsing="false" text="Help">
+                     <items>
+                        <MenuItem fx:id="menuAbout" mnemonicParsing="false" text="About" />
+                     </items>
+                  </Menu>
               </menus>
             </MenuBar>
          </children>
